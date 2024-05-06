@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const itemModel = require('../models/itemModel');
 
-router.post('/items', async (req, res) => {
+
+router.post('/skills', async (req, res) => {
   try {
     const { title, imageurl } = req.body;
     const result = await itemModel.createItem(title, imageurl);
@@ -13,7 +14,7 @@ router.post('/items', async (req, res) => {
   }
 });
 
-router.get('/items', async (req, res) => {
+router.get('/skills', async (req, res) => {
   try {
     const result = await itemModel.getItems();
     res.status(200).send(result);
