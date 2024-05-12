@@ -12,7 +12,9 @@ const createNote = (notes_title, content, noteSkill, datetime, tags) => {
 
 const getNotes = () => {
   return db
-    .query("SELECT notes_title, content, noteSkill, datetime, tags FROM notes;")
+    .query(
+      'SELECT "notes_title", "content", "noteSkill", "datetime", "tags" FROM "notes";'
+    )
     .then((res) => res.rows);
 };
 
@@ -25,9 +27,9 @@ const updateNote = (id, notes_title, content, noteSkill, datetime, tags) => {
     .then((res) => res.rows[0]);
 };
 
-const deleteNote = (id) => {
+const deleteNote = (notes_title) => {
   return db
-    .query("DELETE FROM notes WHERE id = $1;", [id])
+    .query('DELETE FROM "notes" WHERE "notes_title" = $1;', [notes_title])
     .then((res) => res.rows);
 };
 

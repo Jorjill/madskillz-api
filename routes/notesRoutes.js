@@ -22,7 +22,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/notes", async (req, res) => {
+router.get("/", async (req, res) => {
+    console.log("get notes");
   try {
     const result = await noteModel.getNotes();
     res.status(200).send(result);
@@ -32,7 +33,7 @@ router.get("/notes", async (req, res) => {
   }
 });
 
-router.put("/notes/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { notes_title, content, noteSkill, datetime, tags } = req.body;
@@ -53,10 +54,10 @@ router.put("/notes/:id", async (req, res) => {
   }
 });
 
-router.delete("/notes/:id", async (req, res) => {
+router.delete("/:notes_title", async (req, res) => {
   try {
-    const { id } = req.params;
-    const result = await noteModel.deleteNote(id);
+    const { notes_title } = req.params;
+    const result = await noteModel.deleteNote(notes_title);
     res.status(200).send(result);
   } catch (err) {
     console.error("Error in deleting note:", err);
