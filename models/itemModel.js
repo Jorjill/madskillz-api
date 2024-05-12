@@ -12,7 +12,13 @@ const getItems = () => {
     .then(res => res.rows);
 };
 
+const deleteItem = (name) => {
+  return db.query("DELETE FROM items WHERE title = $1;", [name])
+    .then(res => res.rows);
+};
+
 module.exports = {
   createItem,
-  getItems
+  getItems, 
+  deleteItem
 };

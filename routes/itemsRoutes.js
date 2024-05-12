@@ -1,9 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const itemModel = require('../models/itemModel');
+const itemModel = require("../models/itemModel");
 
-
-router.post('/skills', async (req, res) => {
+router.post("/skills", async (req, res) => {
   try {
     const { title, imageurl } = req.body;
     const result = await itemModel.createItem(title, imageurl);
@@ -14,9 +13,21 @@ router.post('/skills', async (req, res) => {
   }
 });
 
-router.get('/skills', async (req, res) => {
+router.get("/skills", async (req, res) => {
   try {
     const result = await itemModel.getItems();
+    res.status(200).send(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+router.delete("/skills/:name", async (req, res) => {
+  console.log("delete");
+  try {
+    const { name } = req.params;
+    const result = await itemModel.deleteItem(name);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);
