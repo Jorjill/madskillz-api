@@ -12,8 +12,8 @@ const getItems = () => {
     .then(res => res.rows);
 };
 
-const deleteItem = (name) => {
-  return db.query("DELETE FROM items WHERE title = $1;", [name])
+const deleteItem = (id) => {
+  return db.query("DELETE FROM items WHERE id = $1;", [id])
     .then(res => res.rows);
 };
 

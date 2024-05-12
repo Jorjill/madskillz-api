@@ -13,7 +13,7 @@ const createNote = (notes_title, content, noteSkill, datetime, tags) => {
 const getNotes = () => {
   return db
     .query(
-      'SELECT "notes_title", "content", "noteSkill", "datetime", "tags" FROM "notes";'
+      'SELECT "id","notes_title", "content", "noteSkill", "datetime", "tags" FROM "notes";'
     )
     .then((res) => res.rows);
 };
@@ -21,15 +21,15 @@ const getNotes = () => {
 const updateNote = (id, notes_title, content, noteSkill, datetime, tags) => {
   return db
     .query(
-      "UPDATE notes SET notes_title = $2, content = $3, noteSkill = $4, datetime = $5, tags = $6 WHERE id = $1 RETURNING *;",
+      'UPDATE "notes" SET "notes_title" = $2, "content" = $3, "noteSkill" = $4, "datetime" = $5, "tags" = $6 WHERE "id" = $1 RETURNING *;',
       [id, notes_title, content, noteSkill, datetime, tags]
     )
     .then((res) => res.rows[0]);
 };
 
-const deleteNote = (notes_title) => {
+const deleteNote = (id) => {
   return db
-    .query('DELETE FROM "notes" WHERE "notes_title" = $1;', [notes_title])
+    .query('DELETE FROM "notes" WHERE "id" = $1;', [id])
     .then((res) => res.rows);
 };
 

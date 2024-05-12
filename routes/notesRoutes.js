@@ -54,10 +54,10 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:notes_title", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const { notes_title } = req.params;
-    const result = await noteModel.deleteNote(notes_title);
+    const { id } = req.params;
+    const result = await noteModel.deleteNote(id);
     res.status(200).send(result);
   } catch (err) {
     console.error("Error in deleting note:", err);
