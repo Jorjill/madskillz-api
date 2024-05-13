@@ -20,4 +20,10 @@ const getReferences = () => {
     .then((res) => res.rows);
 };
 
-module.exports = { createReference, getReference, getReferences};
+const getReferenceBySkill = (skill) => {
+  return db
+    .query('SELECT "id","skill" FROM "references" WHERE "skill" = $1;', [skill])
+    .then((res) => res.rows);
+};
+
+module.exports = { createReference, getReference, getReferences, getReferenceBySkill};
