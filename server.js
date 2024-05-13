@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const itemsRoutes = require('./routes/itemsRoutes');
 const notesRoutes = require('./routes/notesRoutes');  
+const referenceRoutes = require('./routes/referenceRoutes');
 const db = require('./db');
 const cors = require('cors');
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 
 app.use('/', itemsRoutes);
 app.use('/notes', notesRoutes);
+app.use('/reference', referenceRoutes);
 
 db.migrateDatabase();
 
