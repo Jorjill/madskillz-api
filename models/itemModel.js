@@ -8,7 +8,7 @@ const createItem = (title, imageurl) => {
 };
 
 const getItems = () => {
-  return db.query("SELECT title, imageurl FROM items;")
+  return db.query("SELECT id, title, imageurl FROM items;")
     .then(res => res.rows);
 };
 
