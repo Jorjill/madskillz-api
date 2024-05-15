@@ -33,9 +33,23 @@ const deleteNote = (id) => {
     .then((res) => res.rows);
 };
 
+const deleteNoteBySkill = (skill) => {
+  return db
+    .query('DELETE FROM "notes" WHERE "noteSkill" = $1 RETURNING *;', [skill])
+    .then(res => res.rows);
+};
+
+const selectNotesBySkill = (skill) => {
+  return db
+    .query('SELECT * FROM "notes" WHERE "noteSkill" = $1;', [skill])
+    .then(res => res.rows);
+};
+
 module.exports = {
   createNote,
   getNotes,
   updateNote,
   deleteNote,
+  deleteNoteBySkill,
+  selectNotesBySkill,
 };

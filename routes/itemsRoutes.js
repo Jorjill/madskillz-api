@@ -55,7 +55,6 @@ router.get("/skills", async (req, res) => {
 });
 
 router.delete("/skills/:id", async (req, res) => {
-  console.log("delete");
   try {
     const { id } = req.params;
     const result = await itemModel.deleteItem(id);
