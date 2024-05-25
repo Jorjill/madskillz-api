@@ -23,4 +23,27 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await topicModel.deleteTopic(id);
+    res.status(200).send(result);
+  } catch (err) {
+    console.error("Error in deleting topic:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, skill } = req.body;
+    const result = await topicModel.updateTopic(id, title, content, skill);
+    res.status(200).send(result);
+  } catch (err) {
+    console.error("Error in updating topic:", err);
+    res.status(500).send("Server error");
+  }
+});
+
 module.exports = router;

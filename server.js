@@ -16,8 +16,8 @@ app.use(bodyParser.json());
 
 app.use('/', itemsRoutes);
 app.use('/notes', notesRoutes);
-app.use('/reference', referenceRoutes);
-app.use('/topic', topicRoutes);
+app.use('/references', referenceRoutes);
+app.use('/topics', topicRoutes);
 
 db.migrateDatabase();
 
