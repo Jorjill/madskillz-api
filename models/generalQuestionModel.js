@@ -17,7 +17,29 @@ const getGeneralQuestionAnswer = async (
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
 
-  const prompt = `Please rate this answer on a scale of 1-5 if question was: ${question} and ideal answer is: ${answer} and user provided answer: ${providedAnswer}. Provide rating in format: Rating: 5. Reason: It was a great answer, ideal answer is: . Please rate more than 3 only if it's very close to ideal answer:${answer}, but only slight mistakes. If rating is less than 3 it means answer if failed, if more than 3 then passed.`;
+  const prompt = `
+Please rate the provided answer based on the following criteria:
+
+**Rating Criteria:**
+- **5:** The provided answer is very close to the ideal answer with only slight mistakes.
+- **4:** The provided answer is close to the ideal answer but contains a few minor errors.
+- **3:** The provided answer is somewhat similar to the ideal answer but has several noticeable errors.
+- **2:** The provided answer is significantly different from the ideal answer with many errors.
+- **1:** The provided answer is completely incorrect or irrelevant.
+
+Format your rating as follows:
+Rating:[1-5]
+- Reason: [Brief explanation]
+
+Example format:
+Rating:5. Reason: It was a great answer, ideal answer is: ${answer} but the provided answer had slight mistakes such as [specific mistakes].
+
+Here is the question, ideal answer, and the user-provided answer for evaluation:
+
+- **Question:** ${question}
+- **Ideal Answer:** ${answer}
+- **Provided Answer:** ${providedAnswer}
+`;
   console.log("prompt", prompt);
   try {
     const response = await axios.post(
@@ -45,7 +67,7 @@ const getGeneralQuestionAnswer = async (
     const ratingMatch = gptAnswer.match(/Rating:\s*(\d+)/i);
     let rating = null;
     if (ratingMatch) {
-      rating = parseInt(ratingMatch[1], 5);
+      rating = parseInt(ratingMatch[1], 10); // Correct base 10
     }
 
     let result = "FAIL";

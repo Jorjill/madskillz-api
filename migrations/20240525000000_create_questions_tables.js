@@ -2,8 +2,8 @@ exports.up = (pgm) => {
   // Create the Questions table
   pgm.createTable("questions", {
     id: { type: "serial", primaryKey: true },
-    question: { type: "varchar(255)", notNull: true },
-    answer: { type: "varchar(255)", notNull: false },
+    question: { type: "varchar(1000)", notNull: true },
+    answer: { type: "text", notNull: false },
     skill: { type: "varchar(255)", notNull: false },
   });
 };
