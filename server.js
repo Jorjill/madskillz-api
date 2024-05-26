@@ -4,6 +4,7 @@ const itemsRoutes = require('./routes/itemsRoutes');
 const notesRoutes = require('./routes/notesRoutes');  
 const referenceRoutes = require('./routes/referenceRoutes');
 const topicRoutes = require('./routes/topicRoutes');
+const generalQuestionRoutes = require('./routes/generalQuestionRoutes');
 const db = require('./db');
 const cors = require('cors');
 
@@ -18,6 +19,7 @@ app.use('/', itemsRoutes);
 app.use('/notes', notesRoutes);
 app.use('/references', referenceRoutes);
 app.use('/topics', topicRoutes);
+app.use('/general-question', generalQuestionRoutes);
 
 db.migrateDatabase();
 
