@@ -3,7 +3,7 @@ require("dotenv").config();
 const axios = require("axios");
 
 const getExperienceQuestions = async () => {
-  const res = await db.query("SELECT * FROM specific_questions;");
+  const res = await db.query("SELECT * FROM experience_questions;");
   return res.rows;
 };
 
