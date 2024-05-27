@@ -18,16 +18,13 @@ const getItems = () => {
 };
 
 const deleteItem = async (id) => {
-  // First, check if the item exists and get its title
   const res = await db.query("SELECT title FROM items WHERE id = $1;", [id]);
   if (res.rows.length === 0) {
     throw new Error(`Cannot find item with id ${id}`);
   }
 
-  // Use the item's title to get associated reference
   const refs = await getReferenceBySkill(res.rows[0].title);
   if (refs.length > 0) {
-    // If a reference is found, delete the reference
     await deleteReference(refs[0].id);
   }
 
@@ -36,7 +33,6 @@ const deleteItem = async (id) => {
     await deleteNoteBySkill(res.rows[0].title);
   }
 
-  // Finally, delete the item
   const deleteRes = await db.query("DELETE FROM items WHERE id = $1;", [id]);
   return deleteRes.rows;
 };

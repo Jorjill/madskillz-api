@@ -3,7 +3,7 @@ exports.up = (pgm) => {
   pgm.createTable('items', {
     id: { type: 'serial', primaryKey: true },
     title: { type: 'varchar(255)', notNull: true },
-    imageurl: { type: 'varchar(255)', notNull: true, default: '' }
+    imageurl: { type: 'text', notNull: true, default: '' }
   });
 
   // Create notes table

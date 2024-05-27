@@ -72,7 +72,7 @@ const deleteTopic = (id) => {
 
 const filterBase64Images = (content) => {
   const base64ImagePattern = /data:image\/[a-zA-Z]+;base64,[^\s]+/g;
-  return content.replace(base64ImagePattern, '[Image]');
+  return content.replace(base64ImagePattern, "[Image]");
 };
 
 const createGeneralQuestion = async (question, answer, skill) => {
@@ -132,9 +132,7 @@ const generateGeneralQuestions = async (title, content, skill) => {
     );
 
     let gptAnswer = response.data.choices[0].message.content.trim();
-    console.log("GPT Answer:", gptAnswer);
 
-    // Remove backticks and parse JSON
     gptAnswer = gptAnswer
       .replace(/```json/g, "")
       .replace(/```/g, "")
@@ -147,8 +145,6 @@ const generateGeneralQuestions = async (title, content, skill) => {
       console.error("Error parsing JSON:", error);
       throw new Error("Failed to parse GPT-3 response as JSON");
     }
-
-    console.log("Questions and answers:", questionsAndAnswers);
     for (const qa of questionsAndAnswers) {
       await createGeneralQuestion(qa.question, qa.answer, skill);
     }

@@ -2,12 +2,12 @@ const db = require("../db");
 require("dotenv").config();
 const axios = require("axios");
 
-const getSpecificQuestions = async () => {
-  const res = await db.query("SELECT * FROM experience_questions;");
+const getExperienceQuestions = async () => {
+  const res = await db.query("SELECT * FROM specific_questions;");
   return res.rows;
 };
 
-const getSpecificQuestionAnswer = async (
+const getExperienceQuestionAnswer = async (
   id,
   question,
   answer,
@@ -91,6 +91,6 @@ const getSpecificQuestionAnswer = async (
 };
 
 module.exports = {
-  getSpecificQuestionAnswer,
-  getSpecificQuestions,
+  getExperienceQuestions,
+  getExperienceQuestionAnswer,
 };
