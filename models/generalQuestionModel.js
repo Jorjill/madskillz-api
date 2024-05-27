@@ -8,6 +8,14 @@ const getGeneralQuestions = async () => {
   return res.rows;
 };
 
+const createGeneralQuestion = async (question, answer, skill) => {
+  const res = await db.query(
+    "INSERT INTO questions (question, answer, skill) VALUES ($1, $2, $3) RETURNING *;",
+    [question, answer, skill]
+  );
+  return res.rows[0];
+};
+
 const getGeneralQuestionAnswer = async (
   id,
   question,
@@ -40,12 +48,11 @@ Here is the question, ideal answer, and the user-provided answer for evaluation:
 - **Ideal Answer:** ${answer}
 - **Provided Answer:** ${providedAnswer}
 `;
-  console.log("prompt", prompt);
   try {
     const response = await axios.post(
       apiUrl,
       {
-        model: "gpt-3.5-turbo", // Updated model
+        model: "gpt-3.5-turbo",
         messages: [
           { role: "system", content: "You are a helpful assistant." },
           { role: "user", content: prompt },
@@ -73,7 +80,7 @@ Here is the question, ideal answer, and the user-provided answer for evaluation:
     let result = "FAIL";
     let reason = gptAnswer;
 
-    if (rating >= 3) {
+    if (rating >= 4) {
       result = "PASS";
     }
 
@@ -93,4 +100,5 @@ Here is the question, ideal answer, and the user-provided answer for evaluation:
 module.exports = {
   getGeneralQuestions,
   getGeneralQuestionAnswer,
+  createGeneralQuestion,
 };

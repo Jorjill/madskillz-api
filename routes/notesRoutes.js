@@ -6,7 +6,7 @@ router.post("/", async (req, res) => {
   try {
     const { notes_title, content, noteSkill, datetime, tags } = req.body;
     // Convert tags from string to array if necessary
-    const tagsArray = typeof tags === 'string' ? tags.split(",") : tags;
+    const tagsArray = typeof tags === "string" ? tags.split(",") : tags;
 
     const result = await noteModel.createNote(
       notes_title,
@@ -23,7 +23,7 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-    console.log("get notes");
+  console.log("get notes");
   try {
     const result = await noteModel.getNotes();
     res.status(200).send(result);
@@ -37,7 +37,7 @@ router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { notes_title, content, noteSkill, datetime, tags } = req.body;
-    const tagsArray = typeof tags === 'string' ? tags.split(",") : tags;
+    const tagsArray = typeof tags === "string" ? tags.split(",") : tags;
 
     const result = await noteModel.updateNote(
       id,
