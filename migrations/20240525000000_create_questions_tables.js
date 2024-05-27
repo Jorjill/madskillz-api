@@ -5,6 +5,7 @@ exports.up = (pgm) => {
     question: { type: "varchar(1000)", notNull: true },
     answer: { type: "text", notNull: false },
     skill: { type: "varchar(255)", notNull: false },
+    datetime: { type: 'timestamp', notNull: true },
   });
 };
 

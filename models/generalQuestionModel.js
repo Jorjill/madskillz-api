@@ -26,7 +26,7 @@ const getGeneralQuestionAnswer = async (
   const apiUrl = "https://api.openai.com/v1/chat/completions";
 
   const prompt = `
-Please rate the provided answer based on the following criteria:
+Please rate the provided answer based on the following criteria, please also use your own judgement to determine the rating based on the quality of the answer:
 
 **Rating Criteria:**
 - **5:** The provided answer is very close to the ideal answer with only slight mistakes.
@@ -34,6 +34,8 @@ Please rate the provided answer based on the following criteria:
 - **3:** The provided answer is somewhat similar to the ideal answer but has several noticeable errors.
 - **2:** The provided answer is significantly different from the ideal answer with many errors.
 - **1:** The provided answer is completely incorrect or irrelevant.
+
+Sometimes answer might not be same as ideal answer but can still be rated high if it is well written and informative
 
 Format your rating as follows:
 Rating:[1-5]
@@ -80,7 +82,7 @@ Here is the question, ideal answer, and the user-provided answer for evaluation:
     let result = "FAIL";
     let reason = gptAnswer;
 
-    if (rating >= 4) {
+    if (rating >= 3) {
       result = "PASS";
     }
 
