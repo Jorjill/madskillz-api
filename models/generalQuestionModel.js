@@ -16,6 +16,11 @@ const createGeneralQuestion = async (question, answer, skill) => {
   return res.rows[0];
 };
 
+const deleteGeneralQuestion = async (id) => {
+  const res = await db.query("DELETE FROM questions WHERE id = $1;", [id]);
+  return res.rows;
+}
+
 const getGeneralQuestionAnswer = async (
   id,
   question,
@@ -103,4 +108,5 @@ module.exports = {
   getGeneralQuestions,
   getGeneralQuestionAnswer,
   createGeneralQuestion,
+  deleteGeneralQuestion
 };

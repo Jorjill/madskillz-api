@@ -76,9 +76,10 @@ const filterBase64Images = (content) => {
 };
 
 const createGeneralQuestion = async (question, answer, skill) => {
+  const datetime = new Date().toISOString();
   const res = await db.query(
-    "INSERT INTO questions (question, answer, skill) VALUES ($1, $2, $3) RETURNING *;",
-    [question, answer, skill]
+    "INSERT INTO questions (question, answer, skill, datetime) VALUES ($1, $2, $3, $4) RETURNING *;",
+    [question, answer, skill, datetime]
   );
   return res.rows[0];
 };

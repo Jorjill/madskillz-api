@@ -16,7 +16,7 @@ router.post("/answer", async (req, res) => {
     const { id } = req.body;
     const { question } = req.body;
     const { answer } = req.body;
-    const {providedAnswer} = req.body;
+    const { providedAnswer } = req.body;
 
     const result = await generalQuestionModel.getGeneralQuestionAnswer(
       id,
@@ -24,6 +24,17 @@ router.post("/answer", async (req, res) => {
       answer,
       providedAnswer
     );
+    res.status(200).send(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await generalQuestionModel.deleteGeneralQuestion(id);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);

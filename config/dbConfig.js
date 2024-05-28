@@ -1,9 +1,12 @@
-require('dotenv').config();
+require("dotenv").config();
 
 module.exports = {
-  user: process.env.DB_USER || 'user',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'mydatabase',
-  password: process.env.DB_PASSWORD || 'password',
-  port: process.env.DB_PORT || 5432
+  user: process.env.USER,
+  host: process.env.HOST,
+  database: process.env.DATABASE,
+  password: process.env.PASSWORD,
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false
+  },
 };
