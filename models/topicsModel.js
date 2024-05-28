@@ -37,6 +37,7 @@ const getTopics = () => {
         t.title, 
         t.content, 
         t.reference_id, 
+        t.datetime,
         r.skill 
       FROM 
         "topics" as t

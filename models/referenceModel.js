@@ -25,7 +25,8 @@ const getReferences = () => {
             WHEN t.id IS NOT NULL THEN json_build_object(
               'id', t.id,
               'title', t.title, 
-              'content', t.content
+              'content', t.content,
+              'datetime', t.datetime
             )
             ELSE NULL
           END
