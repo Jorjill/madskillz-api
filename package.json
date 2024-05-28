@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "docker-compose up --build",
+    "start": "node ./server.js",
     "test": "echo \"Error: no test specified\"",
     "migrate": "node-pg-migrate up",
     "dev": "nodemon server.js"
