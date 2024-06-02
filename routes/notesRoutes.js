@@ -23,7 +23,6 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  console.log("get notes");
   try {
     const result = await noteModel.getNotes();
     res.status(200).send(result);
