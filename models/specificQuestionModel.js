@@ -7,6 +7,15 @@ const getSpecificQuestions = async () => {
   return res.rows;
 };
 
+const createSpecificQuestion = async (question, answer, skill) => {
+  const datetime = new Date().toISOString();
+  const res = await db.query(
+    "INSERT INTO specific_questions (question, answer, skill, datetime) VALUES ($1, $2, $3, $4) RETURNING *;",
+    [question, answer, skill, datetime]
+  );
+  return res.rows[0];
+};
+
 const getSpecificQuestionAnswer = async (
   id,
   question,
@@ -93,4 +102,5 @@ const getSpecificQuestionAnswer = async (
 module.exports = {
   getSpecificQuestionAnswer,
   getSpecificQuestions,
+  createSpecificQuestion
 };
