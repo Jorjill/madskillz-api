@@ -18,9 +18,6 @@ const addTopic = async (title, content, skill, datetime) => {
       [title, content, reference.id, datetime]
     );
 
-    generateGeneralQuestions(title, content, skill);
-    generateSpecificQuestion(title, content, skill);
-
     return res.rows[0];
   } catch (error) {
     console.error("Error adding topic:", error);

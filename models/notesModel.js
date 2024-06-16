@@ -8,8 +8,6 @@ const createNote = async (notes_title, content, noteSkill, datetime, tags) => {
       [notes_title, content, noteSkill, datetime, tags]
     );
 
-    generateExperienceQuestions(notes_title, content, noteSkill);
-
     return res.rows[0];
   } catch (error) {
     console.error("Error adding topic:", error);
