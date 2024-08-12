@@ -4,12 +4,14 @@ const multer = require("multer");
 const AWS = require("aws-sdk");
 const { v4: uuidv4 } = require("uuid");
 const itemModel = require("../models/itemModel");
+const { user } = require("pg/lib/defaults");
 
 router.post("/skills", async (req, res) => {
   try {
     const { title } = req.body;
-    const { imageurl } = req.body;  
-    const result = await itemModel.createItem(title, imageurl);
+    const { imageurl } = req.body; 
+    const { user_id } = req.body;
+    const result = await itemModel.createItem(title, imageurl, user_id);
     res.status(201).send(result);
   } catch (err) {
     console.error("Error in uploading to S3 or database operation:", err);

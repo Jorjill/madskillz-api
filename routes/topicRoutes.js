@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const topicModel = require("../models/topicsModel");
+const { user } = require("pg/lib/defaults");
 
 router.post("/", async (req, res) => {
   try {
@@ -37,8 +38,8 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, skill, datetime } = req.body;
-    const result = await topicModel.updateTopic(id, title, content, skill, datetime);
+    const { title, content, skill, datetime, user_id } = req.body;
+    const result = await topicModel.updateTopic(id, title, content, skill, datetime, user_id);
     res.status(200).send(result);
   } catch (err) {
     console.error("Error in updating topic:", err);

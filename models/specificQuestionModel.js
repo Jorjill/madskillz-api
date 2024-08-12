@@ -7,11 +7,11 @@ const getSpecificQuestions = async () => {
   return res.rows;
 };
 
-const createSpecificQuestion = async (question, answer, skill) => {
+const createSpecificQuestion = async (question, answer, skill, user_id) => {
   const datetime = new Date().toISOString();
   const res = await db.query(
-    "INSERT INTO specific_questions (question, answer, skill, datetime) VALUES ($1, $2, $3, $4) RETURNING *;",
-    [question, answer, skill, datetime]
+    "INSERT INTO specific_questions (question, answer, skill, datetime, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *;",
+    [question, answer, skill, datetime, user_id]
   );
   return res.rows[0];
 };

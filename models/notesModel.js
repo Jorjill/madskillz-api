@@ -1,11 +1,18 @@
 const db = require("../db");
 const axios = require("axios");
 
-const createNote = async (notes_title, content, noteSkill, datetime, tags) => {
+const createNote = async (
+  notes_title,
+  content,
+  noteSkill,
+  datetime,
+  tags,
+  user_id
+) => {
   try {
     const res = await db.query(
-      'INSERT INTO "notes" ("notes_title", "content", "noteSkill", "datetime", "tags") VALUES ($1, $2, $3, $4, $5) RETURNING *;',
-      [notes_title, content, noteSkill, datetime, tags]
+      'INSERT INTO "notes" ("notes_title", "content", "noteSkill", "datetime", "tags", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;',
+      [notes_title, content, noteSkill, datetime, tags, user_id]
     );
 
     return res.rows[0];
@@ -18,16 +25,24 @@ const createNote = async (notes_title, content, noteSkill, datetime, tags) => {
 const getNotes = () => {
   return db
     .query(
-      'SELECT "id","notes_title", "content", "noteSkill", "datetime", "tags" FROM "notes";'
+      'SELECT "id","notes_title", "content", "noteSkill", "datetime", "tags", "user_id" FROM "notes";'
     )
     .then((res) => res.rows);
 };
 
-const updateNote = (id, notes_title, content, noteSkill, datetime, tags) => {
+const updateNote = (
+  id,
+  notes_title,
+  content,
+  noteSkill,
+  datetime,
+  tags,
+  user_id
+) => {
   return db
     .query(
-      'UPDATE "notes" SET "notes_title" = $2, "content" = $3, "noteSkill" = $4, "datetime" = $5, "tags" = $6 WHERE "id" = $1 RETURNING *;',
-      [id, notes_title, content, noteSkill, datetime, tags]
+      'UPDATE "notes" SET "notes_title" = $2, "content" = $3, "noteSkill" = $4, "datetime" = $5, "tags" = $6, "user_id" = $7 WHERE "id" = $1 RETURNING *;',
+      [id, notes_title, content, noteSkill, datetime, tags, user_id]
     )
     .then((res) => res.rows[0]);
 };

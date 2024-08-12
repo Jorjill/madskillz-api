@@ -1,3 +1,4 @@
+const { user } = require("pg/lib/defaults");
 const db = require("../db");
 
 const createReference = (skill) => {
@@ -20,6 +21,7 @@ const getReferences = () => {
       SELECT 
         r.id as reference_id,
         r.skill,
+        r.user_id,
         coalesce(json_agg(
           CASE
             WHEN t.id IS NOT NULL THEN json_build_object(
@@ -35,11 +37,12 @@ const getReferences = () => {
         "references" as r
         LEFT JOIN "topics" as t ON r.id = t.reference_id
       GROUP BY 
-        r.id, r.skill
+        r.id, r.skill, r.user_id
     `)
     .then(res => res.rows.map(row => ({
       id: row.reference_id,
       skill: row.skill,
+      user_id: row.user_id,
       topics: row.topics
     })));
 };

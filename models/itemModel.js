@@ -1,19 +1,21 @@
 const db = require("../db");
 const { getReferenceBySkill, deleteReference } = require("./referenceModel");
 const { selectNotesBySkill, deleteNoteBySkill } = require("./notesModel");
+const { user } = require("pg/lib/defaults");
 
-const createItem = (title, imageurl) => {
+const createItem = (title, imageurl, user_id) => {
   return db
-    .query("INSERT INTO items (title, imageurl) VALUES ($1, $2) RETURNING *;", [
+    .query("INSERT INTO items (title, imageurl, user_id) VALUES ($1, $2, $3) RETURNING *;", [
       title,
       imageurl,
+      user_id,
     ])
     .then((res) => res.rows[0]);
 };
 
 const getItems = () => {
   return db
-    .query("SELECT id, title, imageurl FROM items;")
+    .query("SELECT id, title, imageurl, user_id FROM items;")
     .then((res) => res.rows);
 };
 

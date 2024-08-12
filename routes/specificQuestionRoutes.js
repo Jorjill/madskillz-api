@@ -16,11 +16,13 @@ router.post("/", async (req, res) => {
     const { question } = req.body;
     const { answer } = req.body;
     const { skill } = req.body;
+    const { user_id } = req.body;
 
     const result = await specificQuestionModel.createSpecificQuestion(
       question,
       answer,
-      skill
+      skill,
+      user_id
     );
     res.status(200).send(result);
   } catch (err) {
