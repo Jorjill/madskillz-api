@@ -22,10 +22,11 @@ const createNote = async (
   }
 };
 
-const getNotes = () => {
+const getNotes = (user_id) => {
   return db
     .query(
-      'SELECT "id","notes_title", "content", "noteSkill", "datetime", "tags", "user_id" FROM "notes";'
+      'SELECT "id","notes_title", "content", "noteSkill", "datetime", "tags", "user_id" FROM "notes" WHERE "user_id" = $1 ;',
+      [user_id]
     )
     .then((res) => res.rows);
 };
@@ -53,15 +54,15 @@ const deleteNote = (id) => {
     .then((res) => res.rows);
 };
 
-const deleteNoteBySkill = (skill) => {
+const deleteNoteBySkill = (skill, user_id) => {
   return db
-    .query('DELETE FROM "notes" WHERE "noteSkill" = $1 RETURNING *;', [skill])
+    .query('DELETE FROM "notes" WHERE "noteSkill" = $1 AND "user_id" = $2 RETURNING *;', [skill, user_id])
     .then((res) => res.rows);
 };
 
-const selectNotesBySkill = (skill) => {
+const selectNotesBySkill = (skill, user_id) => {
   return db
-    .query('SELECT * FROM "notes" WHERE "noteSkill" = $1;', [skill])
+    .query('SELECT * FROM "notes" WHERE "noteSkill" = $1 AND "user_id" = $2;', [skill, user_id])
     .then((res) => res.rows);
 };
 
@@ -70,11 +71,11 @@ const filterBase64Images = (content) => {
   return content.replace(base64ImagePattern, "[Image]");
 };
 
-const createExperienceQuestion = async (question, answer, noteSkill) => {
+const createExperienceQuestion = async (question, answer, noteSkill, user_id) => {
   const datetime = new Date().toISOString();
   const res = await db.query(
-    "INSERT INTO experience_questions (question, answer, skill, datetime) VALUES ($1, $2, $3, $4) RETURNING *;",
-    [question, answer, noteSkill, datetime]
+    "INSERT INTO experience_questions (question, answer, skill, datetime, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *;",
+    [question, answer, noteSkill, datetime, user_id]
   );
   return res.rows[0];
 };

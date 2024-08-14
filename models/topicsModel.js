@@ -2,20 +2,20 @@ const db = require("../db");
 const { createReference, getReferenceBySkill } = require("./referenceModel");
 const axios = require("axios");
 
-const addTopic = async (title, content, skill, datetime) => {
+const addTopic = async (title, content, skill, datetime, user_id) => {
   try {
-    const references = await getReferenceBySkill(skill);
+    const references = await getReferenceBySkill(skill, user_id);
     let reference;
 
     if (references.length > 0) {
       reference = references[0];
     } else {
-      reference = await createReference(skill);
+      reference = await createReference(skill, user_id);
     }
 
     const res = await db.query(
-      'INSERT INTO "topics" ("title", "content", "reference_id", "datetime") VALUES ($1, $2, $3, $4) RETURNING *;',
-      [title, content, reference.id, datetime]
+      'INSERT INTO "topics" ("title", "content", "reference_id", "datetime", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING *;',
+      [title, content, reference.id, datetime, user_id]
     );
 
     return res.rows[0];
@@ -74,11 +74,11 @@ const filterBase64Images = (content) => {
   return content.replace(base64ImagePattern, "[Image]");
 };
 
-const createGeneralQuestion = async (question, answer, skill) => {
+const createGeneralQuestion = async (question, answer, skill, user_id) => {
   const datetime = new Date().toISOString();
   const res = await db.query(
-    "INSERT INTO questions (question, answer, skill, datetime) VALUES ($1, $2, $3, $4) RETURNING *;",
-    [question, answer, skill, datetime]
+    "INSERT INTO questions (question, answer, skill, datetime, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *;",
+    [question, answer, skill, datetime, user_id]
   );
   return res.rows[0];
 };
@@ -92,7 +92,7 @@ const createSpecificQuestion = async (question, answer, skill) => {
   return res.rows[0];
 };
 
-const generateGeneralQuestions = async (title, content, skill) => {
+const generateGeneralQuestions = async (title, content, skill, user_id) => {
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   const filteredContent = filterBase64Images(content);
@@ -146,7 +146,7 @@ const generateGeneralQuestions = async (title, content, skill) => {
       throw new Error("Failed to parse GPT-3 response as JSON");
     }
     for (const qa of questionsAndAnswers) {
-      await createGeneralQuestion(qa.question, qa.answer, skill);
+      await createGeneralQuestion(qa.question, qa.answer, skill, user_id);
     }
   } catch (error) {
     console.error("Error generating questions:", error);

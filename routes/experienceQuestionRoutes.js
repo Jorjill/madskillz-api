@@ -2,8 +2,9 @@ const experienceQuestionModel = require("../models/experienceQuestionModel");
 const router = require("express").Router();
 
 router.get("/", async (req, res) => {
+  const user_id = req.user_id;
   try {
-    const result = await experienceQuestionModel.getExperienceQuestions();
+    const result = await experienceQuestionModel.getExperienceQuestions(user_id);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);

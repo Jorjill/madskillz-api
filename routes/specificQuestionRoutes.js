@@ -2,8 +2,9 @@ const specificQuestionModel = require("../models/specificQuestionModel");
 const router = require("express").Router();
 
 router.get("/", async (req, res) => {
+  const user_id = req.user_id;
   try {
-    const result = await specificQuestionModel.getSpecificQuestions();
+    const result = await specificQuestionModel.getSpecificQuestions(user_id);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);

@@ -1,17 +1,18 @@
 const { user } = require("pg/lib/defaults");
 const db = require("../db");
 
-const createReference = (skill) => {
+const createReference = (skill, user_id) => {
   return db
-    .query('INSERT INTO "references" ("skill") VALUES ($1) RETURNING *;', [
+    .query('INSERT INTO "references" ("skill", "user_id") VALUES ($1, $2) RETURNING *;', [
       skill,
+      user_id
     ])
     .then((res) => res.rows[0]);
 };
 
-const getReference = (id) => {
+const getReference = (id, user_id) => {
   return db
-    .query('SELECT "id","skill" FROM "references" WHERE "id" = $1;', [id])
+    .query('SELECT "id","skill" FROM "references" WHERE "id" = $1 AND "user_id" = $2;', [id, user_id])
     .then((res) => res.rows);
 };
 
@@ -48,21 +49,22 @@ const getReferences = () => {
 };
 
 
-const getReferenceBySkill = (skill) => {
+const getReferenceBySkill = (skill, user_id) => {
   return db
-    .query('SELECT "id","skill" FROM "references" WHERE "skill" = $1;', [skill])
+    .query('SELECT "id","skill" FROM "references" WHERE "skill" = $1 AND "user_id" = $2;', [skill, user_id])
     .then((res) => res.rows);
 };
 
-const deleteReference = (id) => {
+const deleteReference = (id, user_id) => {
   return db
     .query("BEGIN") // Start a transaction
     .then(() => {
-      return db.query('DELETE FROM "topics" WHERE "reference_id" = $1;', [id]);
+      return db.query('DELETE FROM "topics" WHERE "reference_id" = $1 AND "user_id" = $2;', [id, user_id]);
     })
     .then(() => {
-      return db.query('DELETE FROM "references" WHERE "id" = $1 RETURNING *;', [
+      return db.query('DELETE FROM "references" WHERE "id" = $1 AND "user_id" = $2 RETURNING *;', [
         id,
+        user_id
       ]);
     })
     .then((res) => {

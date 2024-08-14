@@ -25,8 +25,9 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
+  const user_id = req.user_id;
   try {
-    const result = await noteModel.getNotes();
+    const result = await noteModel.getNotes(user_id);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);

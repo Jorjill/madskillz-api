@@ -2,8 +2,8 @@ const db = require("../db");
 require("dotenv").config();
 const axios = require("axios");
 
-const getSpecificQuestions = async () => {
-  const res = await db.query("SELECT * FROM specific_questions;");
+const getSpecificQuestions = async (user_id) => {
+  const res = await db.query('SELECT * FROM specific_questions WHERE "user_id" = $1;', [user_id]);
   return res.rows;
 };
 

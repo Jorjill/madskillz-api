@@ -5,8 +5,8 @@ const { user } = require("pg/lib/defaults");
 
 router.post("/", async (req, res) => {
   try {
-    const { title, content, skill, datetime } = req.body;
-    const result = await topicModel.addTopic(title, content, skill, datetime);
+    const { title, content, skill, datetime, user_id } = req.body;
+    const result = await topicModel.addTopic(title, content, skill, datetime, user_id);
     res.status(201).send(result);
   } catch (err) {
     console.error("Error in creating a note:", err);

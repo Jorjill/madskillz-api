@@ -3,9 +3,10 @@ const router = express.Router();
 const referenceModel = require("../models/referenceModel");
 
 router.post("/", async (req, res) => {
+  const user_id = req.user_id;
   try {
     const { skill } = req.body;
-    const result = await referenceModel.createReference(skill);
+    const result = await referenceModel.createReference(skill, user_id);
     res.status(201).send(result);
   } catch (err) {
     console.error("Error in creating a note:", err);

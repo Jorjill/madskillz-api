@@ -20,8 +20,10 @@ router.post("/skills", async (req, res) => {
 });
 
 router.get("/skills", async (req, res) => {
+  const user_id = req.user_id;
+
   try {
-    const result = await itemModel.getItems();
+    const result = await itemModel.getItems(user_id);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);
@@ -30,9 +32,10 @@ router.get("/skills", async (req, res) => {
 });
 
 router.delete("/skills/:id", async (req, res) => {
+  const user_id = req.user_id;
   try {
     const { id } = req.params;
-    const result = await itemModel.deleteItem(id);
+    const result = await itemModel.deleteItem(id, user_id);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);
