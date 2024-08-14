@@ -7,10 +7,10 @@ const itemModel = require("../models/itemModel");
 const { user } = require("pg/lib/defaults");
 
 router.post("/skills", async (req, res) => {
+  const user_id = req.user_id;
   try {
     const { title } = req.body;
     const { imageurl } = req.body; 
-    const { user_id } = req.body;
     const result = await itemModel.createItem(title, imageurl, user_id);
     res.status(201).send(result);
   } catch (err) {
