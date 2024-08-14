@@ -37,8 +37,10 @@ router.get("/by-name/:name", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
+  const user_id = req.user_id;
+  console.log("user_id", user_id);
   try {
-    const result = await referenceModel.getReferences();
+    const result = await referenceModel.getReferences(user_id);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);

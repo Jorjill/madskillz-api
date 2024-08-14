@@ -46,7 +46,7 @@ const getTopics = () => {
 };
 
 const updateTopic = (id, title, content, skill, datetime, user_id) => {
-  return getReferenceBySkill(skill)
+  return getReferenceBySkill(skill, user_id)
     .then((references) => {
       if (references.length > 0) {
         return references[0];
@@ -56,8 +56,8 @@ const updateTopic = (id, title, content, skill, datetime, user_id) => {
     })
     .then((reference) => {
       return db.query(
-        'UPDATE "topics" SET "title" = $1, "content" = $2, "reference_id" = $3, "datetime"=$4, "user_id"=$5 WHERE "id" = $6 RETURNING *;',
-        [title, content, reference.id, datetime, user_id, id]
+        'UPDATE "topics" SET "title" = $1, "content" = $2, "reference_id" = $3, "datetime"=$4 WHERE "id" = $5 AND "user_id" = $6 RETURNING *;',
+        [title, content, reference.id, datetime, id, user_id]
       );
     })
     .then((res) => res.rows[0]);

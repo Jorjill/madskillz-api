@@ -3,8 +3,10 @@ const { get } = require("../routes/generalQuestionRoutes");
 require("dotenv").config();
 const axios = require("axios");
 
-const getGeneralQuestions = async () => {
-  const res = await db.query("SELECT * FROM questions;");
+const getGeneralQuestions = async (user_id) => {
+  const res = await db.query('SELECT * FROM questions WHERE "user_id" = $1;', [
+    user_id,
+  ]);
   return res.rows;
 };
 
@@ -19,7 +21,7 @@ const createGeneralQuestion = async (question, answer, skill, user_id) => {
 const deleteGeneralQuestion = async (id) => {
   const res = await db.query("DELETE FROM questions WHERE id = $1;", [id]);
   return res.rows;
-}
+};
 
 const getGeneralQuestionAnswer = async (
   id,
@@ -108,5 +110,5 @@ module.exports = {
   getGeneralQuestions,
   getGeneralQuestionAnswer,
   createGeneralQuestion,
-  deleteGeneralQuestion
+  deleteGeneralQuestion,
 };

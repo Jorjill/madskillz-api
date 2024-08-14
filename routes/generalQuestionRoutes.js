@@ -2,8 +2,9 @@ const generalQuestionModel = require("../models/generalQuestionModel");
 const router = require("express").Router();
 
 router.get("/", async (req, res) => {
+  const user_id = req.user_id;
   try {
-    const result = await generalQuestionModel.getGeneralQuestions();
+    const result = await generalQuestionModel.getGeneralQuestions(user_id);
     res.status(200).send(result);
   } catch (err) {
     console.error(err);
@@ -12,11 +13,11 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  const user_id = req.user_id;
   try {
     const { question } = req.body;
     const { answer } = req.body;
     const { skill } = req.body;
-    const { user_id } = req.body;
 
     const result = await generalQuestionModel.createGeneralQuestion(
       question,

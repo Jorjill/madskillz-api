@@ -3,22 +3,26 @@ const db = require("../db");
 
 const createReference = (skill, user_id) => {
   return db
-    .query('INSERT INTO "references" ("skill", "user_id") VALUES ($1, $2) RETURNING *;', [
-      skill,
-      user_id
-    ])
+    .query(
+      'INSERT INTO "references" ("skill", "user_id") VALUES ($1, $2) RETURNING *;',
+      [skill, user_id]
+    )
     .then((res) => res.rows[0]);
 };
 
 const getReference = (id, user_id) => {
   return db
-    .query('SELECT "id","skill" FROM "references" WHERE "id" = $1 AND "user_id" = $2;', [id, user_id])
+    .query(
+      'SELECT "id","skill" FROM "references" WHERE "id" = $1 AND "user_id" = $2;',
+      [id, user_id]
+    )
     .then((res) => res.rows);
 };
 
-const getReferences = () => {
+const getReferences = (user_id) => {
   return db
-    .query(`
+    .query(
+      `
       SELECT 
         r.id as reference_id,
         r.skill,
@@ -37,21 +41,29 @@ const getReferences = () => {
       FROM 
         "references" as r
         LEFT JOIN "topics" as t ON r.id = t.reference_id
+      WHERE 
+        r.user_id = $1
       GROUP BY 
         r.id, r.skill, r.user_id
-    `)
-    .then(res => res.rows.map(row => ({
-      id: row.reference_id,
-      skill: row.skill,
-      user_id: row.user_id,
-      topics: row.topics
-    })));
+    `,
+      [user_id]
+    )
+    .then((res) =>
+      res.rows.map((row) => ({
+        id: row.reference_id,
+        skill: row.skill,
+        user_id: row.user_id,
+        topics: row.topics,
+      }))
+    );
 };
-
 
 const getReferenceBySkill = (skill, user_id) => {
   return db
-    .query('SELECT "id","skill" FROM "references" WHERE "skill" = $1 AND "user_id" = $2;', [skill, user_id])
+    .query(
+      'SELECT "id","skill" FROM "references" WHERE "skill" = $1 AND "user_id" = $2;',
+      [skill, user_id]
+    )
     .then((res) => res.rows);
 };
 
@@ -59,13 +71,16 @@ const deleteReference = (id, user_id) => {
   return db
     .query("BEGIN") // Start a transaction
     .then(() => {
-      return db.query('DELETE FROM "topics" WHERE "reference_id" = $1 AND "user_id" = $2;', [id, user_id]);
+      return db.query(
+        'DELETE FROM "topics" WHERE "reference_id" = $1 AND "user_id" = $2;',
+        [id, user_id]
+      );
     })
     .then(() => {
-      return db.query('DELETE FROM "references" WHERE "id" = $1 AND "user_id" = $2 RETURNING *;', [
-        id,
-        user_id
-      ]);
+      return db.query(
+        'DELETE FROM "references" WHERE "id" = $1 AND "user_id" = $2 RETURNING *;',
+        [id, user_id]
+      );
     })
     .then((res) => {
       return db

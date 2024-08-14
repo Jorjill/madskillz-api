@@ -4,8 +4,9 @@ const noteModel = require("../models/notesModel");
 const { user } = require("pg/lib/defaults");
 
 router.post("/", async (req, res) => {
+  const user_id = req.user_id;
   try {
-    const { notes_title, content, noteSkill, datetime, tags, user_id } = req.body;
+    const { notes_title, content, noteSkill, datetime, tags } = req.body;
     // Convert tags from string to array if necessary
     const tagsArray = typeof tags === "string" ? tags.split(",") : tags;
 
@@ -36,9 +37,10 @@ router.get("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
+  const user_id = req.user_id;
   try {
     const { id } = req.params;
-    const { notes_title, content, noteSkill, datetime, tags, user_id } = req.body;
+    const { notes_title, content, noteSkill, datetime, tags } = req.body;
     const tagsArray = typeof tags === "string" ? tags.split(",") : tags;
 
     const result = await noteModel.updateNote(
