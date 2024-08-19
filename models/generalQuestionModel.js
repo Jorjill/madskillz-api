@@ -11,9 +11,10 @@ const getGeneralQuestions = async (user_id) => {
 };
 
 const createGeneralQuestion = async (question, answer, skill, user_id) => {
+  const datetime = new Date().toISOString();
   const res = await db.query(
-    "INSERT INTO questions (question, answer, skill, user_id) VALUES ($1, $2, $3, $4) RETURNING *;",
-    [question, answer, skill, user_id]
+    "INSERT INTO questions (question, answer, skill, datetime, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *;",
+    [question, answer, skill, datetime, user_id]
   );
   return res.rows[0];
 };
