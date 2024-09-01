@@ -9,9 +9,10 @@ const addTopic = async (title, content, skill, datetime, user_id) => {
 
     if (references.length > 0) {
       reference = references[0];
-    } else {
-      reference = await createReference(skill, user_id);
     }
+    // } else {
+    //   reference = await createReference(skill, user_id);
+    // }
 
     const res = await db.query(
       'INSERT INTO "topics" ("title", "content", "reference_id", "datetime", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING *;',
