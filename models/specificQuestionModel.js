@@ -99,8 +99,14 @@ const getSpecificQuestionAnswer = async (
   }
 };
 
+const deleteSpecificQuestion = async (id) => {
+  const res = await db.query('DELETE FROM specific_questions WHERE id = $1 RETURNING *;', [id]);
+  return res.rows[0];
+}
+
 module.exports = {
   getSpecificQuestionAnswer,
   getSpecificQuestions,
-  createSpecificQuestion
+  createSpecificQuestion,
+  deleteSpecificQuestion
 };
