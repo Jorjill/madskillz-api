@@ -2,10 +2,32 @@ const db = require("../db");
 const { createReference, getReferenceBySkill } = require("./referenceModel");
 const axios = require("axios");
 
-const addTopic = async (title, content, skill, datetime, user_id) => {
+const addTopic = async (
+  title,
+  content,
+  skill,
+  datetime,
+  user_id,
+  general_questions,
+  specific_questions
+) => {
   try {
     const references = await getReferenceBySkill(skill, user_id);
     let reference;
+
+    if (general_questions > 0) {
+      generateGeneralQuestions(
+        title,
+        content,
+        skill,
+        user_id,
+        general_questions
+      );
+    }
+
+    if (specific_questions > 0) {
+      generateSpecificQuestion(title, content, skill, specific_questions);
+    }
 
     if (references.length > 0) {
       reference = references[0];
@@ -92,7 +114,21 @@ const createSpecificQuestion = async (question, answer, skill) => {
   return res.rows[0];
 };
 
-const generateGeneralQuestions = async (title, content, skill, user_id, general_questions) => {
+const generateGeneralQuestions = async (
+  title,
+  content,
+  skill,
+  user_id,
+  general_questions
+) => {
+  console.log("Generating general questions...");
+  console.log("Title:", title);
+  console.log("Content:", content);
+  console.log("Skill:", skill);
+  console.log("User ID:", user_id);
+  console.log("Number of questions:", general_questions);
+  
+  
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   const filteredContent = filterBase64Images(content);
@@ -153,7 +189,14 @@ const generateGeneralQuestions = async (title, content, skill, user_id, general_
   }
 };
 
-const generateSpecificQuestion = async (title, content, skill, specific_questions) => {
+const generateSpecificQuestion = async (
+  title,
+  content,
+  skill,
+  specific_questions
+) => {
+  console.log("Generating specific questions...");
+  
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   const filteredContent = filterBase64Images(content);
@@ -218,4 +261,11 @@ const generateSpecificQuestion = async (title, content, skill, specific_question
   }
 };
 
-module.exports = { addTopic, getTopics, updateTopic, deleteTopic, generateGeneralQuestions, generateSpecificQuestion };
+module.exports = {
+  addTopic,
+  getTopics,
+  updateTopic,
+  deleteTopic,
+  generateGeneralQuestions,
+  generateSpecificQuestion,
+};
