@@ -92,12 +92,12 @@ const createSpecificQuestion = async (question, answer, skill) => {
   return res.rows[0];
 };
 
-const generateGeneralQuestions = async (title, content, skill, user_id) => {
+const generateGeneralQuestions = async (title, content, skill, user_id, general_questions) => {
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   const filteredContent = filterBase64Images(content);
   const prompt = `
-  Based on the following title and content, generate 1-3 questions and their corresponding ideal answers based on size of content text. The questions should be general knowledge questions related to the content, not specific details (for example if content is about react styling then question should be explain how react styling must be done) and answer must be at lease 300 words long. The response should be in a JSON format that is easy to parse and use in code, like: [{question:"", answer:""},{question:"", answer:""},{question:"", answer:""}].
+  Based on the following title and content, generate ${general_questions} questions and their corresponding ideal answers based on size of content text. The questions should be general knowledge questions related to the content, not specific details (for example if content is about react styling then question should be explain how react styling must be done) and answer must be at lease 300 words long. The response should be in a JSON format that is easy to parse and use in code, like: [{question:"", answer:""},{question:"", answer:""},{question:"", answer:""}].
   
   Title: ${title}
   
@@ -153,12 +153,12 @@ const generateGeneralQuestions = async (title, content, skill, user_id) => {
   }
 };
 
-const generateSpecificQuestion = async (title, content, skill) => {
+const generateSpecificQuestion = async (title, content, skill, specific_questions) => {
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   const filteredContent = filterBase64Images(content);
   const prompt = `
-  Based on the following title and content, generate 1-3 coding questions and their corresponding ideal answers based on the size of the content text. The questions should be specific coding questions related to the content, asking the user to write some code (for example, if the content is about React styling, then the question must be: 'Please write code to add styling to this component,' or if the question is about controllers in NestJS, then ask the user to write controller code). The answer must be code. Only generate questions and answers if the content is strictly about coding and contains code snippets or detailed explanations of code. If the content is not strictly about coding, return empty responses. The response should be in a JSON format that is easy to parse and use in code, like:  [{question:"", answer:""},{question:"", answer:""},{question:"", answer:""}].
+  Based on the following title and content, generate ${specific_questions} coding questions and their corresponding ideal answers based on the size of the content text. The questions should be specific coding questions related to the content, asking the user to write some code (for example, if the content is about React styling, then the question must be: 'Please write code to add styling to this component,' or if the question is about controllers in NestJS, then ask the user to write controller code). The answer must be code. Only generate questions and answers if the content is strictly about coding and contains code snippets or detailed explanations of code. If the content is not strictly about coding, return empty responses. The response should be in a JSON format that is easy to parse and use in code, like:  [{question:"", answer:""},{question:"", answer:""},{question:"", answer:""}].
   
   Title: ${title}
   
@@ -218,4 +218,4 @@ const generateSpecificQuestion = async (title, content, skill) => {
   }
 };
 
-module.exports = { addTopic, getTopics, updateTopic, deleteTopic };
+module.exports = { addTopic, getTopics, updateTopic, deleteTopic, generateGeneralQuestions, generateSpecificQuestion };

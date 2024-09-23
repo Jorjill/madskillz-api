@@ -1,5 +1,6 @@
 const db = require("../db");
 const axios = require("axios");
+const { generateGeneralQuestions, generateSpecificQuestion } = require('./topicsModel');
 
 const createNote = async (
   notes_title,
@@ -7,8 +8,19 @@ const createNote = async (
   noteSkill,
   datetime,
   tags,
-  user_id
+  user_id,
+  general_questions,
+  specific_questions
 ) => {
+
+  if(general_questions !=null && general_questions > 0){
+    generateGeneralQuestions(notes_title, content, noteSkill, user_id, general_questions);
+  }
+
+  if(specific_questions !=null && specific_questions > 0){
+    generateSpecificQuestion(notes_title, content, noteSkill, specific_questions);
+  }
+
   try {
     const res = await db.query(
       'INSERT INTO "notes" ("notes_title", "content", "noteSkill", "datetime", "tags", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;',
@@ -56,13 +68,19 @@ const deleteNote = (id) => {
 
 const deleteNoteBySkill = (skill, user_id) => {
   return db
-    .query('DELETE FROM "notes" WHERE "noteSkill" = $1 AND "user_id" = $2 RETURNING *;', [skill, user_id])
+    .query(
+      'DELETE FROM "notes" WHERE "noteSkill" = $1 AND "user_id" = $2 RETURNING *;',
+      [skill, user_id]
+    )
     .then((res) => res.rows);
 };
 
 const selectNotesBySkill = (skill, user_id) => {
   return db
-    .query('SELECT * FROM "notes" WHERE "noteSkill" = $1 AND "user_id" = $2;', [skill, user_id])
+    .query('SELECT * FROM "notes" WHERE "noteSkill" = $1 AND "user_id" = $2;', [
+      skill,
+      user_id,
+    ])
     .then((res) => res.rows);
 };
 
@@ -71,7 +89,12 @@ const filterBase64Images = (content) => {
   return content.replace(base64ImagePattern, "[Image]");
 };
 
-const createExperienceQuestion = async (question, answer, noteSkill, user_id) => {
+const createExperienceQuestion = async (
+  question,
+  answer,
+  noteSkill,
+  user_id
+) => {
   const datetime = new Date().toISOString();
   const res = await db.query(
     "INSERT INTO experience_questions (question, answer, skill, datetime, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *;",

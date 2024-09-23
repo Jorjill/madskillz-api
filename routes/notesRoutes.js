@@ -6,7 +6,7 @@ const { user } = require("pg/lib/defaults");
 router.post("/", async (req, res) => {
   const user_id = req.user_id;
   try {
-    const { notes_title, content, noteSkill, datetime, tags } = req.body;
+    const { notes_title, content, noteSkill, datetime, tags, general_questions, specific_questions } = req.body;
     // Convert tags from string to array if necessary
     const tagsArray = typeof tags === "string" ? tags.split(",") : tags;
 
@@ -16,7 +16,9 @@ router.post("/", async (req, res) => {
       noteSkill,
       datetime,
       tagsArray,
-      user_id
+      user_id,
+      general_questions,
+      specific_questions
     );
     res.status(201).send(result);
   } catch (err) {
