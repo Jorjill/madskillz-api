@@ -121,14 +121,7 @@ const generateGeneralQuestions = async (
   user_id,
   general_questions
 ) => {
-  console.log("Generating general questions...");
-  console.log("Title:", title);
-  console.log("Content:", content);
-  console.log("Skill:", skill);
-  console.log("User ID:", user_id);
-  console.log("Number of questions:", general_questions);
-  
-  
+
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   const filteredContent = filterBase64Images(content);

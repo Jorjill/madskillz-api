@@ -7,6 +7,7 @@ const topicRoutes = require("./routes/topicRoutes");
 const generalQuestionRoutes = require("./routes/generalQuestionRoutes");
 const specificQuestionRoutes = require("./routes/specificQuestionRoutes");
 const experienceQuestionRoutes = require("./routes/experienceQuestionRoutes");
+const quizRoutes = require("./routes/quizRoutes");
 const verifyToken = require("./authMiddleware");
 const db = require("./db");
 const cors = require("cors");
@@ -25,6 +26,7 @@ app.use("/topics", verifyToken, topicRoutes);
 app.use("/general-question", verifyToken, generalQuestionRoutes);
 app.use("/specific-question", verifyToken, specificQuestionRoutes);
 app.use("/experience-question", verifyToken, experienceQuestionRoutes);
+app.use("/quizzes", verifyToken, quizRoutes);
 
 db.migrateDatabase();
 
