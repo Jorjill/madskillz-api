@@ -24,45 +24,128 @@ const deleteGeneralQuestion = async (id) => {
   return res.rows;
 };
 
-const getGeneralQuestionAnswer = async (
-  id,
-  question,
-  answer,
-  providedAnswer
-) => {
+// const getGeneralQuestionAnswer = async (
+//   id,
+//   question,
+//   answer,
+//   providedAnswer
+// ) => {
+//   const apiKey = process.env.OPENAI_API_KEY;
+//   const apiUrl = "https://api.openai.com/v1/chat/completions";
+
+//   const prompt = `
+// Please rate the provided answer based on the following criteria, please also use your own judgement to determine the rating based on the quality of the answer:
+
+// **Rating Criteria:**
+// - **5:** The provided answer is very close to the ideal answer with only slight mistakes.
+// - **4:** The provided answer is close to the ideal answer but contains a few minor errors.
+// - **3:** The provided answer is somewhat similar to the ideal answer but has several noticeable errors.
+// - **2:** The provided answer is significantly different from the ideal answer with many errors.
+// - **1:** The provided answer is completely incorrect or irrelevant.
+
+// Sometimes answer might not be same as ideal answer but can still be rated high if it is well written and informative
+
+// Format your rating as follows:
+// Rating:[1-5]
+// - Reason: [Brief explanation]
+
+// Example format:
+// Rating:5. Reason: It was a great answer, ideal answer is: ${answer} but the provided answer had slight mistakes such as [specific mistakes].
+
+// Here is the question, ideal answer, and the user-provided answer for evaluation:
+
+// - **Question:** ${question}
+// - **Ideal Answer:** ${answer}
+// - **Provided Answer:** ${providedAnswer}
+// `;
+//   try {
+//     const response = await axios.post(
+//       apiUrl,
+//       {
+//         model: "gpt-3.5-turbo",
+//         messages: [
+//           { role: "system", content: "You are a helpful assistant." },
+//           { role: "user", content: prompt },
+//         ],
+//         max_tokens: 150,
+//         temperature: 0.7,
+//       },
+//       {
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${apiKey}`,
+//         },
+//       }
+//     );
+
+//     const gptAnswer = response.data.choices[0].message.content.trim();
+
+//     // Extract the rating and reason
+//     const ratingMatch = gptAnswer.match(/Rating:\s*(\d+)/i);
+//     let rating = null;
+//     if (ratingMatch) {
+//       rating = parseInt(ratingMatch[1], 10); // Correct base 10
+//     }
+
+//     let result = "FAIL";
+//     let reason = gptAnswer;
+
+//     if (rating >= 3) {
+//       result = "PASS";
+//     }
+
+//     return {
+//       result,
+//       reason,
+//     };
+//   } catch (error) {
+//     console.error(
+//       "Error calling OpenAI API:",
+//       error.response ? error.response.data : error.message
+//     );
+//     throw new Error("Failed to get response from ChatGPT API");
+//   }
+// };
+
+const getGeneralQuestionAnswer = async (id, question, answer, providedAnswer) => {
   const apiKey = process.env.OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
 
+  // Use GPT-4 if you have access, otherwise you can revert to "gpt-3.5-turbo"
+  const modelName = "gpt-4";
+
+  // A more streamlined prompt, with the same 1-5 rating structure
   const prompt = `
-Please rate the provided answer based on the following criteria, please also use your own judgement to determine the rating based on the quality of the answer:
+Your task is to evaluate the user's answer compared to the "Ideal Answer" based on the following rating criteria, and then provide a rating and reason in the specified format:
 
-**Rating Criteria:**
-- **5:** The provided answer is very close to the ideal answer with only slight mistakes.
-- **4:** The provided answer is close to the ideal answer but contains a few minor errors.
-- **3:** The provided answer is somewhat similar to the ideal answer but has several noticeable errors.
-- **2:** The provided answer is significantly different from the ideal answer with many errors.
-- **1:** The provided answer is completely incorrect or irrelevant.
+**Rating Criteria (1-5):**
+1. The provided answer is completely incorrect or irrelevant.
+2. The provided answer is significantly different from the ideal answer with many errors.
+3. The provided answer is somewhat similar to the ideal answer but has several noticeable errors.
+4. The provided answer is close to the ideal answer but contains a few minor errors.
+5. The provided answer is very close to the ideal answer with only slight mistakes.
 
-Sometimes answer might not be same as ideal answer but can still be rated high if it is well written and informative
+> Note: Even if the provided answer differs from the ideal answer, it can still receive a high rating if it is well-written and informative. Use your best judgment.
 
-Format your rating as follows:
+**Required Response Format** (no additional commentary):
 Rating:[1-5]
 - Reason: [Brief explanation]
 
-Example format:
-Rating:5. Reason: It was a great answer, ideal answer is: ${answer} but the provided answer had slight mistakes such as [specific mistakes].
+Example:
+Rating:5. Reason: It was a great answer. The ideal answer is: \${answer} but the provided answer had only minor issues.
 
-Here is the question, ideal answer, and the user-provided answer for evaluation:
+Here is the information to evaluate:
 
 - **Question:** ${question}
 - **Ideal Answer:** ${answer}
 - **Provided Answer:** ${providedAnswer}
 `;
+
   try {
     const response = await axios.post(
       apiUrl,
       {
-        model: "gpt-3.5-turbo",
+        model: modelName,
         messages: [
           { role: "system", content: "You are a helpful assistant." },
           { role: "user", content: prompt },
@@ -80,17 +163,22 @@ Here is the question, ideal answer, and the user-provided answer for evaluation:
 
     const gptAnswer = response.data.choices[0].message.content.trim();
 
-    // Extract the rating and reason
-    const ratingMatch = gptAnswer.match(/Rating:\s*(\d+)/i);
+    // Extract the rating using a regex
+    // Looks for a line containing "Rating:X"
+    // 'i' for case-insensitive, capturing a digit
+    const ratingMatch = gptAnswer.match(/Rating:\s*(\d)/i);
     let rating = null;
+
     if (ratingMatch) {
-      rating = parseInt(ratingMatch[1], 10); // Correct base 10
+      rating = parseInt(ratingMatch[1], 10);
     }
 
+    // Default to FAIL if we can't parse a rating
     let result = "FAIL";
     let reason = gptAnswer;
 
-    if (rating >= 3) {
+    // If rating is 3 or higher, mark as PASS
+    if (rating && rating >= 3) {
       result = "PASS";
     }
 
