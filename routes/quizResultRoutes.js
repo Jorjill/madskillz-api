@@ -6,7 +6,7 @@ const quizResultModel = require("../models/quizResultModel");
 router.post("/", async (req, res) => {
   const user_id = req.user_id;
   try {
-    const { quiz_name, skill, status, correct_answers, total_questions } = req.body;
+    const { quiz_name, skill, status, correct_answers, total_questions, answerResults } = req.body;
     
     const result = await quizResultModel.createQuizResult(
       quiz_name,
@@ -14,7 +14,8 @@ router.post("/", async (req, res) => {
       status,
       correct_answers,
       total_questions,
-      user_id
+      user_id,
+      answerResults
     );
     res.status(200).send(result);
   } catch (err) {
