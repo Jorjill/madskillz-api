@@ -15,6 +15,46 @@ const getQuizResults = async (user_id) => {
   const res = await db.query('SELECT * FROM quiz_results WHERE user_id = $1 ORDER BY created_at DESC;', [user_id]);
   const results = res.rows;
 
+  // Get the latest quiz date
+  const latestQuizDate = results.length > 0 ? results[0].created_at : null;
+
+  // Check if we need to update the performance summary
+  const summaryRes = await db.query(
+    'SELECT * FROM performance_summaries WHERE user_id = $1',
+    [user_id]
+  );
+  
+  const existingSummary = summaryRes.rows[0];
+  const needsUpdate = !existingSummary || 
+    (latestQuizDate && new Date(latestQuizDate) > new Date(existingSummary.last_quiz_date));
+
+  let performanceSummary = existingSummary ? existingSummary.summary : "No performance summary available.";
+
+  if (needsUpdate && results.length > 0) {
+    const summary = await generatePerformanceSummary(results);
+    if (summary) {
+      performanceSummary = summary;
+      if (existingSummary) {
+        await db.query(
+          'UPDATE performance_summaries SET summary = $1, last_quiz_date = $2, updated_at = NOW() WHERE user_id = $3',
+          [summary, latestQuizDate, user_id]
+        );
+      } else {
+        await db.query(
+          'INSERT INTO performance_summaries (user_id, summary, last_quiz_date) VALUES ($1, $2, $3)',
+          [user_id, summary, latestQuizDate]
+        );
+      }
+    }
+  }
+
+  return {
+    raw_results: results,
+    performance_summary: performanceSummary
+  };
+};
+
+const generatePerformanceSummary = async (results) => {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     const apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -55,17 +95,10 @@ const getQuizResults = async (user_id) => {
       }
     );
 
-    const analysis = response.data.choices[0].message.content;
-    return {
-      raw_results: results,
-      performance_summary: analysis
-    };
+    return response.data.choices[0].message.content;
   } catch (error) {
-    console.error("Error getting OpenAI analysis:", error);
-    return {
-      raw_results: results,
-      performance_summary: "Unable to generate performance summary at this time."
-    };
+    console.error("Error generating performance summary:", error);
+    return null;
   }
 };
 
