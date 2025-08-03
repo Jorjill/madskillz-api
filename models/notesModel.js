@@ -27,17 +27,21 @@ const createNote = async (
       [notes_title, content, noteSkill, datetime, tags, user_id]
     );
 
-    // After adding a new note, update the summary for this skill
+    // After adding a new note, update the summary
     try {
-      // Get all notes for this skill
-      const notes = await selectNotesBySkill(noteSkill, user_id);
-      if (notes && notes.length > 0) {
-        // Generate a new summary and store it in the database
-        await generateSummary(noteSkill, user_id, notes);
+      // Get existing summary if available
+      const existingSummary = await getSummaryFromDB(noteSkill, user_id);
+      
+      if (existingSummary) {
+        // If we already have a summary, just update it with the new note
+        await updateExistingSummaryWithNewNote(existingSummary, res.rows[0], noteSkill, user_id);
+      } else {
+        // If no summary exists, create a new one from scratch
+        await summarizeNotesBySkill(noteSkill, user_id);
       }
-    } catch (summaryError) {
-      console.error("Error updating summary after adding note:", summaryError);
-      // Don't throw the error here to avoid disrupting the note creation process
+    } catch (error) {
+      console.error('Error updating summary after adding note:', error);
+      // Continue even if summarization fails
     }
 
     return res.rows[0];
@@ -71,17 +75,21 @@ const updateNote = async (
       [id, notes_title, content, noteSkill, datetime, tags, user_id]
     );
 
-    // After updating a note, update the summary for this skill
+    // After updating a note, update the summary
     try {
-      // Get all notes for this skill
-      const notes = await selectNotesBySkill(noteSkill, user_id);
-      if (notes && notes.length > 0) {
-        // Generate a new summary and store it in the database
-        await generateSummary(noteSkill, user_id, notes);
+      // Get existing summary if available
+      const existingSummary = await getSummaryFromDB(noteSkill, user_id);
+      
+      if (existingSummary) {
+        // If we already have a summary, just update it with the new note
+        await updateExistingSummaryWithNewNote(existingSummary, res.rows[0], noteSkill, user_id);
+      } else {
+        // If no summary exists, create a new one from scratch
+        await summarizeNotesBySkill(noteSkill, user_id);
       }
-    } catch (summaryError) {
-      console.error("Error updating summary after updating note:", summaryError);
-      // Don't throw the error here to avoid disrupting the note update process
+    } catch (error) {
+      console.error('Error updating summary after updating note:', error);
+      // Continue even if summarization fails
     }
 
     return res.rows[0];
@@ -245,23 +253,165 @@ const getSummaryFromDB = async (skill, user_id) => {
   }
 };
 
-// Generate a summary using OpenAI
-const generateSummary = async (skill, user_id, notes) => {
+// Update an existing summary with a new note
+const updateExistingSummaryWithNewNote = async (existingSummary, newNote, skill, user_id) => {
   try {
-    console.log(`Generating summary for ${notes.length} notes with skill ${skill}`);
+    console.log(`Updating existing summary for skill ${skill} with new note`);
     
-    // Prepare the content for summarization
-    const notesContent = notes.map((note, index) => {
-      console.log(`Processing note ${index + 1}/${notes.length}: ${note.notes_title}`);
-      return `Title: ${note.notes_title}\n\nContent: ${filterBase64Images(note.content)}`;
+    const apiKey = process.env.OPENAI_API_KEY;
+    const apiUrl = "https://api.openai.com/v1/chat/completions";
+    
+    const prompt = `
+    Here is an existing summary of notes about "${skill}":
+    
+    ${existingSummary.summary}
+    
+    Please update this summary to include the following new note:
+    
+    Title: ${newNote.notes_title}
+    
+    Content: ${newNote.content}
+    
+    The updated summary should remain concise and focused on essential information.
+    `;
+    
+    const response = await axios.post(
+      apiUrl,
+      {
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: "You are a helpful assistant that updates summaries with new information." },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 1500,
+        temperature: 0.5,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+      }
+    );
+    
+    const updatedSummary = response.data.choices[0].message.content.trim();
+    console.log(`Generated updated summary: ${updatedSummary.substring(0, 100)}...`);
+    
+    // Store the updated summary
+    await storeSummary(skill, user_id, updatedSummary, existingSummary.note_count + 1);
+    
+    return {
+      summary: updatedSummary,
+      noteCount: existingSummary.note_count + 1,
+      skill
+    };
+  } catch (error) {
+    console.error("Error updating summary with new note:", error);
+    throw error;
+  }
+};
+
+// Generate a summary using OpenAI with chunking for large note sets
+const generateSummary = async (notes, skill, user_id) => {
+  try {
+    console.log(`Generating summary for ${notes.length} notes about ${skill}`);
+    
+    // Define chunk size - adjust based on testing
+    const CHUNK_SIZE = 10; // Number of notes per chunk
+    const MAX_TOKENS_PER_NOTE = 1000; // Estimated average tokens per note
+    
+    // If we have a small number of notes, process directly
+    if (notes.length <= CHUNK_SIZE) {
+      return await generateSingleSummary(notes, skill, user_id);
+    }
+    
+    // For larger sets, use chunked approach
+    console.log(`Using chunked approach for ${notes.length} notes`);
+    
+    // Split notes into chunks
+    const chunks = [];
+    for (let i = 0; i < notes.length; i += CHUNK_SIZE) {
+      chunks.push(notes.slice(i, i + CHUNK_SIZE));
+    }
+    
+    console.log(`Split notes into ${chunks.length} chunks`);
+    
+    // Generate summary for each chunk
+    const chunkSummaries = [];
+    for (let i = 0; i < chunks.length; i++) {
+      console.log(`Processing chunk ${i+1}/${chunks.length} with ${chunks[i].length} notes`);
+      
+      try {
+        const chunkResult = await generateSingleSummary(chunks[i], `${skill} (part ${i+1})`, user_id, false);
+        chunkSummaries.push(chunkResult.summary);
+      } catch (error) {
+        console.error(`Error processing chunk ${i+1}:`, error.message);
+        // Continue with other chunks even if one fails
+        chunkSummaries.push(`[Error summarizing chunk ${i+1}]`);
+      }
+    }
+    
+    // Now summarize the summaries
+    console.log(`Generating meta-summary from ${chunkSummaries.length} chunk summaries`);
+    
+    const apiKey = process.env.OPENAI_API_KEY;
+    const apiUrl = "https://api.openai.com/v1/chat/completions";
+    
+    const metaPrompt = `
+    Below are summaries of different sets of notes about "${skill}".
+    Create a comprehensive yet concise summary that captures the key points across all these summaries.
+    
+    ${chunkSummaries.map((summary, i) => `Summary ${i+1}:\n${summary}`).join('\n\n---\n\n')}
+    `;
+    
+    const response = await axios.post(
+      apiUrl,
+      {
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: "You are a helpful assistant that creates concise summaries from multiple sources." },
+          { role: "user", content: metaPrompt },
+        ],
+        max_tokens: 1500,
+        temperature: 0.5,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+      }
+    );
+    
+    const finalSummary = response.data.choices[0].message.content.trim();
+    console.log(`Generated final summary: ${finalSummary.substring(0, 100)}...`);
+    
+    // Store the final summary in the database
+    await storeSummary(skill, user_id, finalSummary, notes.length);
+    
+    return {
+      summary: finalSummary,
+      noteCount: notes.length,
+      skill
+    };
+  } catch (error) {
+    console.error("Error in chunked summary generation:", error);
+    throw error;
+  }
+};
+
+// Helper function to generate a summary for a single chunk of notes
+const generateSingleSummary = async (notes, skill, user_id, storeInDb = true) => {
+  try {
+    // Concatenate notes with separators
+    const notesContent = notes.map(note => {
+      return `Title: ${note.notes_title}\n\nContent: ${note.content}`;
     }).join('\n\n---\n\n');
-    
-    console.log(`Total content length: ${notesContent.length} characters`);
 
     const apiKey = process.env.OPENAI_API_KEY;
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
-    // Make sure OpenAI gets all notes by explicitly mentioning the count
+    // Create prompt for this chunk
     const prompt = `
     Create a brief, concise summary of these ${notes.length} notes about "${skill}".
     Keep it short and to the point, focusing only on the most essential information.
@@ -269,8 +419,6 @@ const generateSummary = async (skill, user_id, notes) => {
     
     ${notesContent}
     `;
-    
-    console.log(`Sending prompt to OpenAI with ${notes.length} notes`);
 
     const response = await axios.post(
       apiUrl,
@@ -295,8 +443,10 @@ const generateSummary = async (skill, user_id, notes) => {
     
     console.log(`Received summary from OpenAI: ${summary.substring(0, 100)}...`);
     
-    // Store the summary in the database
-    await storeSummary(skill, user_id, summary, notes.length);
+    // Store in database only if requested (we don't store intermediate summaries)
+    if (storeInDb) {
+      await storeSummary(skill, user_id, summary, notes.length);
+    }
     
     return { 
       summary,
@@ -304,7 +454,7 @@ const generateSummary = async (skill, user_id, notes) => {
       skill
     };
   } catch (error) {
-    console.error("Error generating summary:", error);
+    console.error("Error generating single summary:", error);
     throw error;
   }
 };
@@ -337,7 +487,7 @@ const summarizeNotesBySkill = async (skill, user_id) => {
     
     console.log(`No existing summary found, generating new summary for skill: ${skill}`);
     // Generate and store a new summary
-    return await generateSummary(skill, user_id, notes);
+    return await generateSummary(notes, skill, user_id);
   } catch (error) {
     console.error("Error summarizing notes:", error);
     throw error;
