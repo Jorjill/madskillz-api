@@ -266,13 +266,17 @@ const updateExistingSummaryWithNewNote = async (existingSummary, newNote, skill,
     
     ${existingSummary.summary}
     
-    Please update this summary to include the following new note:
+    Please update this summary to incorporate the following new note:
     
     Title: ${newNote.notes_title}
     
     Content: ${newNote.content}
     
-    The updated summary should remain concise and focused on essential information.
+    The updated summary should be detailed and comprehensive, providing a thorough overview that captures key concepts, methodologies, patterns, and practical applications.
+    Expand on important points and include relevant context to give a complete understanding of the material.
+    Your summary should be more detailed than a brief outline, but still well-organized and focused.
+    
+    IMPORTANT: Do not just append the new note at the end or list it separately. Instead, fully integrate the new information into the existing summary in a cohesive way.
     `;
     
     const response = await axios.post(
@@ -359,10 +363,14 @@ const generateSummary = async (notes, skill, user_id) => {
     
     const metaPrompt = `
     Below are summaries of different sets of notes about "${skill}".
-    Create a comprehensive yet concise summary that captures the key points across all these summaries.
+    Create a detailed and comprehensive summary that synthesizes all the information across these summaries.
+    Provide a thorough overview that captures key concepts, methodologies, patterns, and practical applications.
+    Expand on important points and include relevant context to give a complete understanding of the material.
+    Your summary should be more detailed than a brief outline, but still well-organized and focused.
     
     ${chunkSummaries.map((summary, i) => `Summary ${i+1}:\n${summary}`).join('\n\n---\n\n')}
     `;
+    
     
     const response = await axios.post(
       apiUrl,
@@ -413,9 +421,10 @@ const generateSingleSummary = async (notes, skill, user_id, storeInDb = true) =>
 
     // Create prompt for this chunk
     const prompt = `
-    Create a brief, concise summary of these ${notes.length} notes about "${skill}".
-    Keep it short and to the point, focusing only on the most essential information.
-    Each note is separated by '---'.
+    Create a detailed and comprehensive summary of these ${notes.length} notes about "${skill}".
+    Provide a thorough overview that captures key concepts, methodologies, patterns, and practical applications.
+    Expand on important points and include relevant context to give a complete understanding of the material.
+    Your summary should be more detailed than a brief outline, but still well-organized and focused.
     
     ${notesContent}
     `;
