@@ -311,10 +311,23 @@ const generateSummary = async (skill, user_id, notes) => {
 
 const summarizeNotesBySkill = async (skill, user_id) => {
   try {
-    // First, check if we have a summary in the database
+    console.log(`Summarizing notes for skill: ${skill}, user_id: ${user_id}`);
+    
+    // Get all notes for the specified skill and user first
+    const notes = await selectNotesBySkill(skill, user_id);
+    console.log(`Found ${notes ? notes.length : 0} notes for skill ${skill}`);
+    
+    // If no notes exist, return early
+    if (!notes || notes.length === 0) {
+      console.log(`No notes found for skill: ${skill}`);
+      return { summary: "No notes found for this skill." };
+    }
+    
+    // Check if we have a summary in the database
     const existingSummary = await getSummaryFromDB(skill, user_id);
     
     if (existingSummary) {
+      console.log(`Found existing summary in database for skill: ${skill}`);
       return {
         summary: existingSummary.summary,
         noteCount: existingSummary.note_count,
@@ -322,13 +335,7 @@ const summarizeNotesBySkill = async (skill, user_id) => {
       };
     }
     
-    // If no summary exists, get all notes for the specified skill and user
-    const notes = await selectNotesBySkill(skill, user_id);
-    
-    if (!notes || notes.length === 0) {
-      return { summary: "No notes found for this skill." };
-    }
-
+    console.log(`No existing summary found, generating new summary for skill: ${skill}`);
     // Generate and store a new summary
     return await generateSummary(skill, user_id, notes);
   } catch (error) {
