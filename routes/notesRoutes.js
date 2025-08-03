@@ -72,4 +72,22 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// New endpoint to get a summary of all notes for a specific skill using OpenAI
+router.get("/summary/:skillId", async (req, res) => {
+  const user_id = req.user_id;
+  try {
+    const { skillId } = req.params;
+    
+    if (!skillId) {
+      return res.status(400).send("Skill ID is required");
+    }
+    
+    const result = await noteModel.summarizeNotesBySkill(skillId, user_id);
+    res.status(200).send(result);
+  } catch (err) {
+    console.error("Error in summarizing notes:", err);
+    res.status(500).send("Server error");
+  }
+});
+
 module.exports = router;
