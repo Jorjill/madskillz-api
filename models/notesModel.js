@@ -27,22 +27,27 @@ const createNote = async (
       [notes_title, content, noteSkill, datetime, tags, user_id]
     );
 
-    // After adding a new note, update the summary
-    try {
-      // Get existing summary if available
-      const existingSummary = await getSummaryFromDB(noteSkill, user_id);
-      
-      if (existingSummary) {
-        // If we already have a summary, just update it with the new note
-        await updateExistingSummaryWithNewNote(existingSummary, res.rows[0], noteSkill, user_id);
-      } else {
-        // If no summary exists, create a new one from scratch
-        await summarizeNotesBySkill(noteSkill, user_id);
+    // After adding a new note, update the summary asynchronously
+    // We don't await this to avoid slowing down the note creation
+    (async () => {
+      try {
+        console.log(`Asynchronously updating summary for skill: ${noteSkill}`);
+        // Get existing summary if available
+        const existingSummary = await getSummaryFromDB(noteSkill, user_id);
+        
+        if (existingSummary) {
+          // If we already have a summary, just update it with the new note
+          await updateExistingSummaryWithNewNote(existingSummary, res.rows[0], noteSkill, user_id);
+        } else {
+          // If no summary exists, create a new one from scratch
+          await summarizeNotesBySkill(noteSkill, user_id);
+        }
+        console.log(`Completed asynchronous summary update for skill: ${noteSkill}`);
+      } catch (error) {
+        console.error('Error updating summary after adding note:', error);
+        // Continue even if summarization fails
       }
-    } catch (error) {
-      console.error('Error updating summary after adding note:', error);
-      // Continue even if summarization fails
-    }
+    })();
 
     return res.rows[0];
   } catch (error) {
@@ -75,22 +80,27 @@ const updateNote = async (
       [id, notes_title, content, noteSkill, datetime, tags, user_id]
     );
 
-    // After updating a note, update the summary
-    try {
-      // Get existing summary if available
-      const existingSummary = await getSummaryFromDB(noteSkill, user_id);
-      
-      if (existingSummary) {
-        // If we already have a summary, just update it with the new note
-        await updateExistingSummaryWithNewNote(existingSummary, res.rows[0], noteSkill, user_id);
-      } else {
-        // If no summary exists, create a new one from scratch
-        await summarizeNotesBySkill(noteSkill, user_id);
+    // After updating a note, update the summary asynchronously
+    // We don't await this to avoid slowing down the note update
+    (async () => {
+      try {
+        console.log(`Asynchronously updating summary for skill: ${noteSkill} after note update`);
+        // Get existing summary if available
+        const existingSummary = await getSummaryFromDB(noteSkill, user_id);
+        
+        if (existingSummary) {
+          // If we already have a summary, just update it with the new note
+          await updateExistingSummaryWithNewNote(existingSummary, res.rows[0], noteSkill, user_id);
+        } else {
+          // If no summary exists, create a new one from scratch
+          await summarizeNotesBySkill(noteSkill, user_id);
+        }
+        console.log(`Completed asynchronous summary update for skill: ${noteSkill} after note update`);
+      } catch (error) {
+        console.error('Error updating summary after updating note:', error);
+        // Continue even if summarization fails
       }
-    } catch (error) {
-      console.error('Error updating summary after updating note:', error);
-      // Continue even if summarization fails
-    }
+    })();
 
     return res.rows[0];
   } catch (error) {
@@ -99,19 +109,74 @@ const updateNote = async (
   }
 };
 
-const deleteNote = (id) => {
-  return db
-    .query('DELETE FROM "notes" WHERE "id" = $1;', [id])
-    .then((res) => res.rows);
+const deleteNote = async (id) => {
+  try {
+    // First, get the note details to know which skill it belongs to
+    const noteDetails = await db.query('SELECT "noteSkill", "user_id" FROM "notes" WHERE "id" = $1;', [id]);
+    
+    if (noteDetails.rows.length === 0) {
+      console.log(`Note with id ${id} not found`);
+      return [];
+    }
+    
+    const { noteSkill, user_id } = noteDetails.rows[0];
+    
+    // Delete the note
+    const deleteResult = await db.query('DELETE FROM "notes" WHERE "id" = $1 RETURNING *;', [id]);
+    
+    // After deleting, regenerate the summary for this skill asynchronously
+    // We don't await this to avoid slowing down the note deletion
+    (async () => {
+      try {
+        console.log(`Asynchronously regenerating summary for skill ${noteSkill} after note deletion`);
+        
+        // Get all remaining notes for this skill
+        const remainingNotes = await selectNotesBySkill(noteSkill, user_id);
+        
+        if (remainingNotes && remainingNotes.length > 0) {
+          // If there are still notes for this skill, regenerate the summary
+          await generateSummary(remainingNotes, noteSkill, user_id);
+        } else {
+          // If no notes remain for this skill, delete any existing summary
+          await db.query('DELETE FROM "summaries" WHERE "skill" = $1 AND "user_id" = $2;', [noteSkill, user_id]);
+          console.log(`Deleted summary for skill ${noteSkill} as no notes remain`);
+        }
+        console.log(`Completed asynchronous summary regeneration for skill: ${noteSkill} after note deletion`);
+      } catch (error) {
+        console.error(`Error regenerating summary after note deletion: ${error.message}`);
+        // Continue even if summary regeneration fails
+      }
+    })();
+    
+    return deleteResult.rows;
+  } catch (error) {
+    console.error(`Error in deleteNote: ${error.message}`);
+    throw error;
+  }
 };
 
-const deleteNoteBySkill = (skill, user_id) => {
-  return db
-    .query(
+const deleteNoteBySkill = async (skill, user_id) => {
+  try {
+    // Delete all notes for this skill
+    const deleteResult = await db.query(
       'DELETE FROM "notes" WHERE "noteSkill" = $1 AND "user_id" = $2 RETURNING *;',
       [skill, user_id]
-    )
-    .then((res) => res.rows);
+    );
+    
+    // Also delete any existing summary for this skill
+    try {
+      await db.query('DELETE FROM "summaries" WHERE "skill" = $1 AND "user_id" = $2;', [skill, user_id]);
+      console.log(`Deleted summary for skill ${skill} as all notes were deleted`);
+    } catch (error) {
+      console.error(`Error deleting summary after notes deletion: ${error.message}`);
+      // Continue even if summary deletion fails
+    }
+    
+    return deleteResult.rows;
+  } catch (error) {
+    console.error(`Error in deleteNoteBySkill: ${error.message}`);
+    throw error;
+  }
 };
 
 const selectNotesBySkill = (skill, user_id) => {
