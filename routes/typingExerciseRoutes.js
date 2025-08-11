@@ -48,14 +48,7 @@ router.get("/:skill", async (req, res) => {
       return res.status(400).json({ error: "Skill parameter is required" });
     }
 
-    let exercises = await typingExerciseModel.getTypingExercises(user_id, skill);
-    
-    // If no exercises exist, create default ones
-    if (exercises.length === 0) {
-      console.log(`No typing exercises found for user ${user_id} and skill ${skill}. Creating default exercises.`);
-      exercises = await typingExerciseModel.createDefaultExercises(user_id, skill);
-    }
-
+    const exercises = await typingExerciseModel.getTypingExercises(user_id, skill);
     res.status(200).json(exercises);
   } catch (err) {
     console.error("Error fetching typing exercises:", err);
