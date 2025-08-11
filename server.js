@@ -9,6 +9,7 @@ const specificQuestionRoutes = require("./routes/specificQuestionRoutes");
 const experienceQuestionRoutes = require("./routes/experienceQuestionRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const quizResultRoutes = require("./routes/quizResultRoutes");
+const typingExerciseRoutes = require("./routes/typingExerciseRoutes");
 const verifyToken = require("./authMiddleware");
 const db = require("./db");
 const cors = require("cors");
@@ -29,6 +30,7 @@ app.use("/specific-question", verifyToken, specificQuestionRoutes);
 app.use("/experience-question", verifyToken, experienceQuestionRoutes);
 app.use("/quizzes", verifyToken, quizRoutes);
 app.use("/quiz-results", verifyToken, quizResultRoutes);
+app.use("/typing-exercises", verifyToken, typingExerciseRoutes);
 
 db.migrateDatabase();
 
