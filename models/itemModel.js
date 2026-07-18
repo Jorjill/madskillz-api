@@ -15,10 +15,20 @@ const createItem = (title, imageurl, user_id) => {
 const getItems = (user_id) => {
   return db
     .query(
-      "SELECT id, title, imageurl, user_id FROM items WHERE user_id = $1;",
+      "SELECT id, title, imageurl, user_id, position FROM items WHERE user_id = $1 ORDER BY position ASC NULLS LAST, id ASC;",
       [user_id]
     )
     .then((res) => res.rows);
+};
+
+const updateItemPositions = async (skills, user_id) => {
+  const promises = skills.map(({ id, position }) =>
+    db.query(
+      "UPDATE items SET position = $1 WHERE id = $2 AND user_id = $3;",
+      [position, id, user_id]
+    )
+  );
+  return Promise.all(promises);
 };
 
 const deleteItem = async (id, user_id) => {
@@ -48,4 +58,5 @@ module.exports = {
   createItem,
   getItems,
   deleteItem,
+  updateItemPositions,
 };

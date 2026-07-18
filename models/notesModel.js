@@ -429,9 +429,19 @@ const generateSummary = async (notes, skill, user_id) => {
     const metaPrompt = `
     Below are summaries of different sets of notes about "${skill}".
     Create a detailed and comprehensive summary that synthesizes all the information across these summaries.
+    Format your response as clean HTML that will look good in a web UI. Use the following guidelines:
+    - Use <h2> for the main skill title
+    - Use <h3> for major sections/topics
+    - Use <h4> for subsections
+    - Use <ul> and <li> for lists of key points
+    - Use <p> for paragraphs
+    - Use <strong> for emphasis on important concepts
+    - Use <code> for technical terms or code snippets
+    - Organize content with proper headings and structure
+    
     Provide a thorough overview that captures key concepts, methodologies, patterns, and practical applications.
     Expand on important points and include relevant context to give a complete understanding of the material.
-    Your summary should be more detailed than a brief outline, but still well-organized and focused.
+    Your summary should be well-organized, visually appealing, and easy to read in a web interface.
     
     ${chunkSummaries.map((summary, i) => `Summary ${i+1}:\n${summary}`).join('\n\n---\n\n')}
     `;
@@ -442,7 +452,7 @@ const generateSummary = async (notes, skill, user_id) => {
       {
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a helpful assistant that creates concise summaries from multiple sources." },
+          { role: "system", content: "You are a helpful assistant that creates concise summaries from multiple sources. Always format your responses as clean, well-structured HTML suitable for web display." },
           { role: "user", content: metaPrompt },
         ],
         max_tokens: 1500,
@@ -487,9 +497,19 @@ const generateSingleSummary = async (notes, skill, user_id, storeInDb = true) =>
     // Create prompt for this chunk
     const prompt = `
     Create a detailed and comprehensive summary of these ${notes.length} notes about "${skill}".
+    Format your response as clean HTML that will look good in a web UI. Use the following guidelines:
+    - Use <h2> for the main skill title
+    - Use <h3> for major sections/topics
+    - Use <h4> for subsections
+    - Use <ul> and <li> for lists of key points
+    - Use <p> for paragraphs
+    - Use <strong> for emphasis on important concepts
+    - Use <code> for technical terms or code snippets
+    - Organize content with proper headings and structure
+    
     Provide a thorough overview that captures key concepts, methodologies, patterns, and practical applications.
     Expand on important points and include relevant context to give a complete understanding of the material.
-    Your summary should be more detailed than a brief outline, but still well-organized and focused.
+    Your summary should be well-organized, visually appealing, and easy to read in a web interface.
     
     ${notesContent}
     `;
@@ -499,7 +519,7 @@ const generateSingleSummary = async (notes, skill, user_id, storeInDb = true) =>
       {
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a helpful assistant that summarizes technical notes and learning materials." },
+          { role: "system", content: "You are a helpful assistant that summarizes technical notes and learning materials. Always format your responses as clean, well-structured HTML suitable for web display." },
           { role: "user", content: prompt },
         ],
         max_tokens: 1500,

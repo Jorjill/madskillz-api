@@ -31,6 +31,21 @@ router.get("/skills", async (req, res) => {
   }
 });
 
+router.patch("/skills/reorder", async (req, res) => {
+  const user_id = req.user_id;
+  try {
+    const { skills } = req.body;
+    if (!Array.isArray(skills) || skills.length === 0) {
+      return res.status(400).send("Invalid skills array");
+    }
+    await itemModel.updateItemPositions(skills, user_id);
+    res.status(200).send({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
 router.delete("/skills/:id", async (req, res) => {
   const user_id = req.user_id;
   try {
