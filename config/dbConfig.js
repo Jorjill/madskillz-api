@@ -1,5 +1,3 @@
-const { ssl } = require("pg/lib/defaults");
-
 require("dotenv").config();
 
 module.exports = {
@@ -8,4 +6,7 @@ module.exports = {
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
   port: 5432,
+  ssl: {
+    rejectUnauthorized: false
+  },
 };
