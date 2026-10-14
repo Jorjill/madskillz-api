@@ -4,6 +4,7 @@ const nodePgMigrate = require('node-pg-migrate').default;
 
 const pool = new Pool(dbConfig);
 
+
 const migrateDatabase = async () => {
   const migrationOptions = {
     databaseUrl: process.env.DATABASE_URL + "?sslmode=no-verify",
